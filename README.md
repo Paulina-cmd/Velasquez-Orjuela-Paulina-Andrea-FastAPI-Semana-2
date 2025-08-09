@@ -8,6 +8,16 @@ Este proyecto es la continuación de la **Semana 1**, con mejoras:
 - Validación automática de datos con **Pydantic**.
 - Endpoint **POST** funcional.
 
+
+## Reflexión
+En esta semana aprendí a:
+
+Usar type hints para documentar y validar mejor las funciones.
+
+Implementar Pydantic para validar automáticamente los datos de entrada.
+
+Manejar parámetros de ruta y query en FastAPI.
+
 ---
 
 ## 📂 Endpoints
