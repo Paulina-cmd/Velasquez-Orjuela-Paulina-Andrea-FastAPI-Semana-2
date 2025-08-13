@@ -1,46 +1,38 @@
-from typing import List
-from fastapi import FastAPI, Query, Path
-from pydantic import BaseModel, Field
+from fastapi import FastAPI
+from pydantic import BaseModel
+from typing import List, Optional
 
+app = FastAPI()
 
-app = FastAPI(
-    title="API Semana 2",
-    description="API con mejoras: Type hints + Pydantic + Endpoint POST",
-    version="2.0.0"
-)
+products = []
 
+class Product(BaseModel):
+    id: int
+    name: str
+    price: float
+    description: Optional[str] = None
 
-class Item(BaseModel):
-    name: str = Field(..., min_length=3, max_length=50, description="Nombre del item")
-    price: float = Field(..., gt=0, description="Precio positivo del item")
-    tags: List[str] = Field(default=[], description="Lista opcional de etiquetas")
+@app.get("/")
+def home() -> dict:
+    return {"message": "¡Bienvenido a mi API mejorada con FastAPI!"}
 
+@app.get("/products")
+def get_products() -> List[Product]:
+    return products
 
+@app.get("/products/{product_id}")
+def get_product(product_id: int) -> dict:
+    for product in products:
+        if product["id"] == product_id:
+            return product
+    return {"error": "Producto no encontrado"}
 
-@app.get("/", tags=["Base"])
-def read_root() -> dict:
-    """
-    Endpoint raíz de bienvenida.
-    """
-    return {"message": "Bienvenido a la API mejorada de Semana 2 🚀"}
+@app.post("/products")
+def create_product(product: Product) -> dict:
+    products.append(product.dict())
+    return {"message": "Producto creado exitosamente", "product": product}
 
-@app.get("/items/{item_id}", tags=["Items"])
-def read_item(
-    item_id: int = Path(..., gt=0, description="ID del item, entero positivo"),
-    q: str | None = Query(default=None, max_length=50, description="Filtro opcional")
-) -> dict:
-    """
-    Devuelve un item por su ID con un filtro opcional.
-    """
-    return {"item_id": item_id, "query": q}
+@app.get("/search")
+def search_product(name: str) -> List[dict]:
+    return [p for p in products if name.lower() in p["name"].lower()]
 
-
-@app.post("/items/", tags=["Items"])
-def create_item(item: Item) -> dict:
-    """
-    Crea un nuevo item con validación automática gracias a Pydantic.
-    """
-    return {
-        "message": "Item creado exitosamente",
-        "item": item.dict()
-    }
